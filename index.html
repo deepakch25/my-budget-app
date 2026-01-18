@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Personal Budget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Budget Tracker</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-lg shadow-md h-fit">
+                <h2 class="text-xl font-semibold mb-4">Add Transaction</h2>
+                <form id="budget-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Description</label>
+                        <input type="text" id="desc" class="w-full p-2 border rounded" placeholder="e.g. Groceries" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Amount ($)</label>
+                        <input type="number" id="amount" class="w-full p-2 border rounded" placeholder="0.00" step="0.01" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Type</label>
+                        <select id="type" class="w-full p-2 border rounded">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">Add to Budget</button>
+                </form>
+            </div>
+
+            <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">History</h2>
+                    <div class="text-lg font-bold">Balance: <span id="balance">$0.00</span></div>
+                </div>
+                <ul id="transaction-list" class="divide-y divide-gray-200">
+                    </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('budget-form');
+	const list = document.getElementById('transaction-list');
+	const balanceEl = document.getElementById('balance');
+
+	// Load data from LocalStorage or start empty
+	let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+	function updateUI() {
+	    list.innerHTML = '';
+	    let total = 0;
+
+	    transactions.forEach((t, index) => {
+        	const isExpense = t.type === 'expense';
+	        total += isExpense ? -t.amount : t.amount;
+
+        	const li = document.createElement('li');
+	        li.className = "py-3 flex justify-between items-center";
+	        li.innerHTML = `
+        	    <span>${t.desc}</span>
+	            <span class="${isExpense ? 'text-red-500' : 'text-green-500'} font-medium">
+        	        ${isExpense ? '-' : '+'}$${t.amount.toFixed(2)}
+	            </span>
+        	`;
+	        list.appendChild(li);
+	    });
+
+	    balanceEl.innerText = `$${total.toFixed(2)}`;
+	    balanceEl.className = total >= 0 ? 'text-green-600' : 'text-red-600';
+	}
+
+	form.addEventListener('submit', (e) => {
+	    e.preventDefault();
+	    const newTransaction = {
+	        desc: document.getElementById('desc').value,
+	        amount: parseFloat(document.getElementById('amount').value),
+        	type: document.getElementById('type').value
+	    };
+
+	    transactions.push(newTransaction);
+	    localStorage.setItem('transactions', JSON.stringify(transactions));
+		updateUI();
+    		form.reset();
+	});
+	
+	// Initial Render
+	updateUI();
+    </script>
+</body>
+</html>
