@@ -3,94 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Personal Budget</title>
+    <title>Bharat Budget Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8">Budget Tracker</h1>
+<body class="bg-slate-50 p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-emerald-800 mb-8 text-center">🇮🇳 Bharat Budget Tracker</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white p-6 rounded-lg shadow-md h-fit">
-                <h2 class="text-xl font-semibold mb-4">Add Transaction</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100">
+                <h2 class="text-xl font-semibold mb-4 text-emerald-700 border-b pb-2">New Entry</h2>
                 <form id="budget-form" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Description</label>
-                        <input type="text" id="desc" class="w-full p-2 border rounded" placeholder="e.g. Groceries" required>
+                        <label class="block text-xs font-bold uppercase text-gray-500">Date</label>
+                        <input type="date" id="date" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500" required>
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Amount ($)</label>
-                        <input type="number" id="amount" class="w-full p-2 border rounded" placeholder="0.00" step="0.01" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Type</label>
-                        <select id="type" class="w-full p-2 border rounded">
-                            <option value="expense">Expense</option>
-                            <option value="income">Income</option>
+                        <label class="block text-xs font-bold uppercase text-gray-500">Transaction Type</label>
+                        <select id="type" class="w-full p-2 border rounded-lg">
+                            <option value="expense">Expense (Outflow)</option>
+                            <option value="income">Income (Inflow)</option>
                         </select>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">Add to Budget</button>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500">Category (Area)</label>
+                        <select id="category" class="w-full p-2 border rounded-lg">
+                            <option value="Household">Household (Rent, Kirana, Bills)</option>
+                            <option value="Transport">Transport (Petrol, Auto, Cab)</option>
+                            <option value="Lifestyle">Lifestyle (Dining, Shopping, OTT)</option>
+                            <option value="Others">Others (Medical, Gifts, Fees)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500">Description</label>
+                            <input type="text" id="desc" class="p-2 border rounded-lg w-full" placeholder="e.g. Milk" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500">For Whom</label>
+                            <input type="text" id="person" class="p-2 border rounded-lg w-full" placeholder="e.g. Self/Mom">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500">Amount (₹)</label>
+                        <input type="number" id="amount" class="w-full p-2 border rounded-lg text-lg font-bold" placeholder="0.00" required>
+                    </div>
+
+                    <button type="submit" class="w-full bg-emerald-600 text-white p-3 rounded-lg font-bold hover:bg-emerald-700 shadow-md transition">Save Transaction</button>
                 </form>
             </div>
 
-            <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-md">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold">History</h2>
-                    <div class="text-lg font-bold">Balance: <span id="balance">$0.00</span></div>
+            <div class="lg:col-span-2 space-y-8">
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100">
+                    <h2 class="text-xl font-semibold mb-4 text-emerald-700">Monthly Inflow vs Outflow</h2>
+                    <div class="h-64">
+                        <canvas id="budgetChart"></canvas>
+                    </div>
                 </div>
-                <ul id="transaction-list" class="divide-y divide-gray-200">
-                    </ul>
+
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-emerald-700">Recent Transactions</h2>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500 uppercase font-bold">Total Balance</p>
+                            <span id="balance" class="text-2xl font-black">₹0</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-gray-400 text-sm uppercase border-b">
+                                    <th class="pb-2">Date/Person</th>
+                                    <th class="pb-2">Details</th>
+                                    <th class="pb-2 text-right">Amount</th>
+                                    <th class="pb-2 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transaction-list" class="divide-y divide-gray-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const form = document.getElementById('budget-form');
-	const list = document.getElementById('transaction-list');
-	const balanceEl = document.getElementById('balance');
+        let transactions = JSON.parse(localStorage.getItem('in_budget_v1')) || [];
+        let myChart;
 
-	// Load data from LocalStorage or start empty
-	let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        function updateUI() {
+            const list = document.getElementById('transaction-list');
+            const balanceEl = document.getElementById('balance');
+            list.innerHTML = '';
+            
+            let total = 0;
+            let monthlyIn = 0;
+            let monthlyOut = 0;
 
-	function updateUI() {
-	    list.innerHTML = '';
-	    let total = 0;
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-	    transactions.forEach((t, index) => {
-        	const isExpense = t.type === 'expense';
-	        total += isExpense ? -t.amount : t.amount;
+            transactions.forEach((t, index) => {
+                const isExpense = t.type === 'expense';
+                total += isExpense ? -t.amount : t.amount;
+                if(isExpense) monthlyOut += t.amount; else monthlyIn += t.amount;
 
-        	const li = document.createElement('li');
-	        li.className = "py-3 flex justify-between items-center";
-	        li.innerHTML = `
-        	    <span>${t.desc}</span>
-	            <span class="${isExpense ? 'text-red-500' : 'text-green-500'} font-medium">
-        	        ${isExpense ? '-' : '+'}$${t.amount.toFixed(2)}
-	            </span>
-        	`;
-	        list.appendChild(li);
-	    });
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition";
+                row.innerHTML = `
+                    <td class="py-4 text-sm">
+                        <div class="font-bold text-gray-700">${t.date}</div>
+                        <div class="text-gray-400 text-xs">${t.person || 'N/A'}</div>
+                    </td>
+                    <td class="py-4">
+                        <div class="font-medium text-gray-800">${t.desc}</div>
+                        <div class="text-xs px-2 py-0.5 bg-gray-100 rounded-full inline-block text-gray-500">${t.category}</div>
+                    </td>
+                    <td class="py-4 text-right font-bold ${isExpense ? 'text-red-500' : 'text-emerald-500'}">
+                        ${isExpense ? '-' : '+'}$${t.amount.toLocaleString('en-IN')}
+                    </td>
+                    <td class="py-4 text-center">
+                        <button onclick="deleteTx(${index})" class="text-gray-300 hover:text-red-500 transition text-xl">&times;</button>
+                    </td>
+                `;
+                list.appendChild(row);
+            });
 
-	    balanceEl.innerText = `$${total.toFixed(2)}`;
-	    balanceEl.className = total >= 0 ? 'text-green-600' : 'text-red-600';
-	}
+            balanceEl.innerText = `₹${total.toLocaleString('en-IN')}`;
+            balanceEl.className = `text-2xl font-black ${total >= 0 ? 'text-emerald-600' : 'text-red-600'}`;
+            
+            updateChart(monthlyIn, monthlyOut);
+        }
 
-	form.addEventListener('submit', (e) => {
-	    e.preventDefault();
-	    const newTransaction = {
-	        desc: document.getElementById('desc').value,
-	        amount: parseFloat(document.getElementById('amount').value),
-        	type: document.getElementById('type').value
-	    };
+        function updateChart(income, expense) {
+            const ctx = document.getElementById('budgetChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Monthly Summary'],
+                    datasets: [
+                        { label: 'Inflow (Income)', data: [income], backgroundColor: '#10b981' },
+                        { label: 'Outflow (Expense)', data: [expense], backgroundColor: '#ef4444' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
 
-	    transactions.push(newTransaction);
-	    localStorage.setItem('transactions', JSON.stringify(transactions));
-		updateUI();
-    		form.reset();
-	});
-	
-	// Initial Render
-	updateUI();
+        document.getElementById('budget-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newTx = {
+                date: document.getElementById('date').value,
+                type: document.getElementById('type').value,
+                category: document.getElementById('category').value,
+                desc: document.getElementById('desc').value,
+                person: document.getElementById('person').value,
+                amount: parseFloat(document.getElementById('amount').value)
+            };
+            transactions.push(newTx);
+            localStorage.setItem('in_budget_v1', JSON.stringify(transactions));
+            updateUI();
+            e.target.reset();
+        });
+
+        function deleteTx(index) {
+            transactions.splice(index, 1);
+            localStorage.setItem('in_budget_v1', JSON.stringify(transactions));
+            updateUI();
+        }
+
+        // Set default date to today
+        document.getElementById('date').valueAsDate = new Date();
+        updateUI();
     </script>
 </body>
 </html>
